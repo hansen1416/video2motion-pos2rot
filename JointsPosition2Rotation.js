@@ -2,26 +2,47 @@ import * as THREE from 'three';
 
 export default class JointsPosition2Rotation {
 
-    // mediapipe 33 joints mapping to index
+    // // mediapipe 33 joints mapping to index
+    // joints_map_origin = {
+    //     "PELVIS": 0,
+    //     "LEFT_HIP": 1,
+    //     "LEFT_KNEE": 2,
+    //     "LEFT_ANKLE": 3,
+    //     "RIGHT_HIP": 4,
+    //     "RIGHT_KNEE": 5,
+    //     "RIGHT_ANKLE": 6,
+    //     "spine": 7,
+    //     "NECK": 8,
+    //     "nose": 9,
+    //     "top": 10,
+    //     "RIGHT_SHOULDER": 11,
+    //     "RIGHT_ELBOW": 12,
+    //     "RIGHT_WRIST": 13,
+    //     "LEFT_SHOULDER": 14,
+    //     "LEFT_ELBOW": 15,
+    //     "LEFT_WRIST": 16,
+    // };
+
     joints_map = {
-        "pelvis": 0,
-        "LEFT_HIP": 1,
-        "LEFT_KNEE": 2,
-        "LEFT_ANKLE": 3,
-        "RIGHT_HIP": 4,
-        "RIGHT_KNEE": 5,
-        "RIGHT_ANKLE": 6,
+        "PELVIS": 0,
+        "LEFT_HIP": 4,
+        "LEFT_KNEE": 5,
+        "LEFT_ANKLE": 6,
+        "RIGHT_HIP": 1,
+        "RIGHT_KNEE": 2,
+        "RIGHT_ANKLE": 3,
         "spine": 7,
-        "neck": 8,
+        "NECK": 8,
         "nose": 9,
         "top": 10,
-        "RIGHT_SHOULDER": 11,
-        "RIGHT_ELBOW": 12,
-        "RIGHT_WRIST": 13,
-        "LEFT_SHOULDER": 14,
-        "LEFT_ELBOW": 15,
-        "LEFT_WRIST": 16,
+        "RIGHT_SHOULDER": 14,
+        "RIGHT_ELBOW": 15,
+        "RIGHT_WRIST": 16,
+        "LEFT_SHOULDER": 11,
+        "LEFT_ELBOW": 12,
+        "LEFT_WRIST": 13,
     };
+
 
     /**
      * @type {Array<Float32Array>}
@@ -259,6 +280,49 @@ export default class JointsPosition2Rotation {
         this.rotations[bone_name] = local_quaternion_bone.normalize()
     }
 
+
+    #pelvisRotation () {
+
+
+        const left_hip = this.pose3d[this.joints_map["LEFT_HIP"]];
+        const right_hip = this.pose3d[this.joints_map["RIGHT_HIP"]];
+        const neck = this.pose3d[this.joints_map["NECK"]];
+        const pelvis = this.pose3d[this.joints_map["PELVIS"]];
+
+
+        const xaxis = new THREE.Vector3()
+            .subVectors(left_hip, right_hip)
+            .normalize();
+
+        const y_tmp = new THREE.Vector3()
+            .subVectors(neck, pelvis)
+            .normalize();
+
+        const zaxis = new THREE.Vector3()
+            .crossVectors(xaxis, y_tmp)
+            .normalize();
+
+        // console.log(xaxis, y_tmp, zaxis)
+
+        const yaxis = new THREE.Vector3()
+            .crossVectors(zaxis, xaxis)
+            .normalize();
+
+        // console.log(xaxis, yaxis, zaxis)
+
+        const m0 = new THREE.Matrix4().makeBasis(
+            new THREE.Vector3(1, 0, 0),
+            new THREE.Vector3(0, 1, 0),
+            new THREE.Vector3(0, 0, 1)
+        );
+
+        const m1 = new THREE.Matrix4().makeBasis(xaxis, yaxis, zaxis);
+
+        const m = m1.multiply(m0.invert());
+
+        return new THREE.Quaternion().setFromRotationMatrix(m);
+    }
+
     /**
      *
      * @param {{x:number, y:number, z:number}[]} pose3D
@@ -266,7 +330,24 @@ export default class JointsPosition2Rotation {
      */
     applyPose2Bone (pose3D) {
 
+        /**
+         * the coordinates system used by videopose3d as follows:
+         * x-axis: from right to left (negative at right)
+         * y-axis: from top to bottom (negative at top)
+         * z-axis: from back to front (negative at back)
+         * so swap left and eight (already did in `joints_map`), reverse y axis to fit the three.js coordinates system
+         */
+
         this.pose3d = pose3D;
+
+        for (let i in this.pose3d) {
+            // this.pose3d[i].x = this.pose3d[i].x;
+            this.pose3d[i].y = -this.pose3d[i].y;
+        }
+
+        this.rotations["Hips"] = this.#pelvisRotation();
+
+        return
 
         const [abs_q, chest_q] = this.#torsoRotation();
 

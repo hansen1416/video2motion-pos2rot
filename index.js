@@ -36,6 +36,8 @@ fs.readdir(filepath, (err, files) => {
 
                 bone_rotations.push(jpr.getRotationsEuler())
 
+                // break
+
             }
 
             // console.log(bone_rotations)
@@ -49,7 +51,7 @@ fs.readdir(filepath, (err, files) => {
 
             const json_filename = file.replace(".avi.npy", ".json")
 
-            fs.writeFileSync(path.join(os.homedir(), "Documents", "video2motion", "results_euler", json_filename), json_data)
+            fs.writeFileSync(path.join(os.homedir(), "Documents", "video2motion-animplayer", "public", "anim-euler-uniform", json_filename), json_data)
 
 
             // break
