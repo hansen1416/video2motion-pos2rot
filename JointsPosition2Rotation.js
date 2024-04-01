@@ -354,4 +354,13 @@ export default class JointsPosition2Rotation {
         );
 
     }
+
+    getRotationsEuler () {
+        const eulers = {};
+        for (const key in this.rotations) {
+            const euler = new THREE.Euler().setFromQuaternion(this.rotations[key]);
+            eulers[key] = [euler.x, euler.y, euler.z];
+        }
+        return eulers;
+    }
 }

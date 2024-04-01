@@ -32,7 +32,7 @@ fs.readdir(filepath, (err, files) => {
 
                 jpr.applyPose2Bone(joints_vectors)
 
-                console.log(jpr.rotations)
+                console.log(jpr.getRotationsEuler())
                 break
             }
 
