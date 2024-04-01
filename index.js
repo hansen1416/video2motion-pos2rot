@@ -3,8 +3,8 @@ import path from "path"
 import fs from "fs"
 import os from "os"
 
-import { read_joints, process_frame } from "./pos2rot.js"
-
+import { read_joints, positions2vectors } from "./pos2rot.js"
+import JointsPosition2Rotation from "./JointsPosition2Rotation.js"
 
 const npy = new npyjs()
 
@@ -20,15 +20,25 @@ fs.readdir(filepath, (err, files) => {
             const buffer = fs.readFileSync(path.join(filepath, file))
             const res = npy.parse(buffer.buffer.slice(0, buffer.length))
 
+            const res_shaped = read_joints(res)
 
+            for (let i = 0; i < res_shaped.length; i++) {
 
-            const data_shaped = read_joints(res)
+                const joints_vectors = positions2vectors(res_shaped[i])
 
-            for (let i = 0; i < data_shaped.length; i++) {
-                process_frame(data_shaped[i])
+                // console.log(joints_vectors)
 
+                const jpr = new JointsPosition2Rotation(joints_vectors)
+
+                jpr.applyPose2Bone(joints_vectors)
+
+                console.log(jpr.rotations)
                 break
             }
+
+            // const data_shaped = read_joints(res)
+
+
 
 
 
