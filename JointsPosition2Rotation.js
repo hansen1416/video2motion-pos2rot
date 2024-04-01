@@ -31,7 +31,7 @@ export default class JointsPosition2Rotation {
         "RIGHT_HIP": 1,
         "RIGHT_KNEE": 2,
         "RIGHT_ANKLE": 3,
-        "spine": 7,
+        "SPINE": 7,
         "NECK": 8,
         "nose": 9,
         "top": 10,
@@ -323,6 +323,50 @@ export default class JointsPosition2Rotation {
         return new THREE.Quaternion().setFromRotationMatrix(m);
     }
 
+    #spine2rotation () {
+        const left_shoulder = this.pose3d[this.joints_map["LEFT_SHOULDER"]];
+        const right_shoulder = this.pose3d[this.joints_map["RIGHT_SHOULDER"]];
+        const neck = this.pose3d[this.joints_map["NECK"]];
+        const spine = this.pose3d[this.joints_map["SPINE"]];
+
+        const xaxis = new THREE.Vector3()
+            .subVectors(left_shoulder, right_shoulder)
+            .normalize();
+
+        const y_tmp = new THREE.Vector3()
+            .subVectors(neck, spine)
+            .normalize();
+
+        const zaxis = new THREE.Vector3()
+            .crossVectors(xaxis, y_tmp)
+            .normalize();
+
+        const yaxis = new THREE.Vector3()
+            .crossVectors(zaxis, xaxis)
+            .normalize();
+
+        const m0 = new THREE.Matrix4().makeBasis(
+            new THREE.Vector3(1, 0, 0),
+            new THREE.Vector3(0, 1, 0),
+            new THREE.Vector3(0, 0, 1)
+        );
+
+        const m1 = new THREE.Matrix4().makeBasis(xaxis, yaxis, zaxis);
+
+        const m = m1.multiply(m0.invert());
+
+        // need to reduct pelvis rotation
+        const spine2_q_world = new THREE.Quaternion().setFromRotationMatrix(m);
+
+        //  spine2_q_local * pelvis_q_local  = spine2_q_world
+        //  spine2_q_local = spine2_q_world * pelvis_q_local.conjugate()
+
+        return new THREE.Quaternion().multiplyQuaternions(
+            spine2_q_world,
+            this.rotations["Hips"].clone().conjugate()
+        );
+    }
+
     /**
      *
      * @param {{x:number, y:number, z:number}[]} pose3D
@@ -346,6 +390,8 @@ export default class JointsPosition2Rotation {
         }
 
         this.rotations["Hips"] = this.#pelvisRotation();
+
+        this.rotations["Spine2"] = this.#spine2rotation();
 
         return
 
