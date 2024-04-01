@@ -77,3 +77,23 @@ export function positions2vectors (joints_positions) {
 
     return joints_vectors
 }
+
+export function bone_rotations2animation_euler (bone_rotations) {
+    // use the keys from `bone_rotations[0]` as keys for `animation_euler`
+
+    const animation_euler = {}
+
+    for (let i in bone_rotations[0]) {
+        animation_euler[i] = []
+    }
+
+    // console.log(animation_euler)
+
+    for (let i = 0; i < bone_rotations.length; i++) {
+        for (let j in bone_rotations[i]) {
+            animation_euler[j].push(bone_rotations[i][j])
+        }
+    }
+
+    return animation_euler
+}

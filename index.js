@@ -3,7 +3,7 @@ import path from "path"
 import fs from "fs"
 import os from "os"
 
-import { read_joints, positions2vectors } from "./pos2rot.js"
+import { read_joints, positions2vectors, bone_rotations2animation_euler } from "./pos2rot.js"
 import JointsPosition2Rotation from "./JointsPosition2Rotation.js"
 
 const npy = new npyjs()
@@ -22,6 +22,8 @@ fs.readdir(filepath, (err, files) => {
 
             const res_shaped = read_joints(res)
 
+            const bone_rotations = []
+
             for (let i = 0; i < res_shaped.length; i++) {
 
                 const joints_vectors = positions2vectors(res_shaped[i])
@@ -32,14 +34,22 @@ fs.readdir(filepath, (err, files) => {
 
                 jpr.applyPose2Bone(joints_vectors)
 
-                console.log(jpr.getRotationsEuler())
-                break
+                bone_rotations.push(jpr.getRotationsEuler())
+
             }
 
-            // const data_shaped = read_joints(res)
+            // console.log(bone_rotations)
 
+            const animation_euler = bone_rotations2animation_euler(bone_rotations)
 
+            // console.log(animation_euler)
 
+            // save `animation_euler` to json file
+            const json_data = JSON.stringify(animation_euler, null, 4)
+
+            const json_filename = file.replace(".avi.npy", ".json")
+
+            fs.writeFileSync(path.join(os.homedir(), "Documents", "video2motion", "results_euler", json_filename), json_data)
 
 
             // break
