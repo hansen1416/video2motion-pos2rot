@@ -3,45 +3,45 @@ import * as THREE from 'three';
 export default class JointsPosition2Rotation {
 
     // // mediapipe 33 joints mapping to index
-    // joints_map_origin = {
-    //     "PELVIS": 0,
-    //     "LEFT_HIP": 1,
-    //     "LEFT_KNEE": 2,
-    //     "LEFT_ANKLE": 3,
-    //     "RIGHT_HIP": 4,
-    //     "RIGHT_KNEE": 5,
-    //     "RIGHT_ANKLE": 6,
-    //     "spine": 7,
-    //     "NECK": 8,
-    //     "nose": 9,
-    //     "top": 10,
-    //     "RIGHT_SHOULDER": 11,
-    //     "RIGHT_ELBOW": 12,
-    //     "RIGHT_WRIST": 13,
-    //     "LEFT_SHOULDER": 14,
-    //     "LEFT_ELBOW": 15,
-    //     "LEFT_WRIST": 16,
-    // };
-
     joints_map = {
         "PELVIS": 0,
-        "LEFT_HIP": 4,
-        "LEFT_KNEE": 5,
-        "LEFT_ANKLE": 6,
-        "RIGHT_HIP": 1,
-        "RIGHT_KNEE": 2,
-        "RIGHT_ANKLE": 3,
-        "SPINE": 7,
+        "LEFT_HIP": 1,
+        "LEFT_KNEE": 2,
+        "LEFT_ANKLE": 3,
+        "RIGHT_HIP": 4,
+        "RIGHT_KNEE": 5,
+        "RIGHT_ANKLE": 6,
+        "spine": 7,
         "NECK": 8,
         "nose": 9,
         "top": 10,
-        "RIGHT_SHOULDER": 14,
-        "RIGHT_ELBOW": 15,
-        "RIGHT_WRIST": 16,
-        "LEFT_SHOULDER": 11,
-        "LEFT_ELBOW": 12,
-        "LEFT_WRIST": 13,
+        "RIGHT_SHOULDER": 11,
+        "RIGHT_ELBOW": 12,
+        "RIGHT_WRIST": 13,
+        "LEFT_SHOULDER": 14,
+        "LEFT_ELBOW": 15,
+        "LEFT_WRIST": 16,
     };
+
+    // joints_map = {
+    //     "PELVIS": 0,
+    //     "LEFT_HIP": 4,
+    //     "LEFT_KNEE": 5,
+    //     "LEFT_ANKLE": 6,
+    //     "RIGHT_HIP": 1,
+    //     "RIGHT_KNEE": 2,
+    //     "RIGHT_ANKLE": 3,
+    //     "SPINE": 7,
+    //     "NECK": 8,
+    //     "nose": 9,
+    //     "top": 10,
+    //     "RIGHT_SHOULDER": 14,
+    //     "RIGHT_ELBOW": 15,
+    //     "RIGHT_WRIST": 16,
+    //     "LEFT_SHOULDER": 11,
+    //     "LEFT_ELBOW": 12,
+    //     "LEFT_WRIST": 13,
+    // };
 
 
     /**
@@ -55,17 +55,71 @@ export default class JointsPosition2Rotation {
     rotations = {
         "Hips": new THREE.Quaternion(0, 0, 0, 1),
         "Spine2": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftShoulder": new THREE.Quaternion(0, 0, 0, 1),
+        "LeftShoulder": new THREE.Quaternion(0.4816880226135254, 0.4927692711353302, -0.5889065265655518, 0.4223082959651947),
         "LeftArm": new THREE.Quaternion(0, 0, 0, 1),
         "LeftForeArm": new THREE.Quaternion(0, 0, 0, 1),
-        "RightShoulder": new THREE.Quaternion(0, 0, 0, 1),
+        "RightShoulder": new THREE.Quaternion(
+            0.48168784379959106,
+            -0.4927700459957123,
+            0.588905930519104,
+            0.42230847477912903
+        ),
         "RightArm": new THREE.Quaternion(0, 0, 0, 1),
         "RightForeArm": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftUpLeg": new THREE.Quaternion(0, 0, 0, 1),
+        "LeftUpLeg": new THREE.Quaternion(
+            0.0019053755095228553,
+            0.056365966796875,
+            -0.9978452920913696,
+            0.03352741152048111
+        ),
         "LeftLeg": new THREE.Quaternion(0, 0, 0, 1),
-        "RightUpLeg": new THREE.Quaternion(0, 0, 0, 1),
+        "RightUpLeg": new THREE.Quaternion(
+            0.0019610640592873096,
+            -0.05636449530720711,
+            0.9978451728820801,
+            0.03352941572666168
+        ),
         "RightLeg": new THREE.Quaternion(0, 0, 0, 1),
     }
+
+    /**
+     * left shoulder
+     * {
+    "isEuler": true,
+    "_x": 1.5198795050922367,
+    "_y": -0.15171872670981498,
+    "_z": -1.753153402330732,
+    "_order": "XYZ"
+    }
+
+    right shoulder 
+    {
+        "isEuler": true,
+        "_x": 1.5198807179038891,
+        "_y": 0.1517170924223086,
+        "_z": 1.7531534740480517,
+        "_order": "XYZ"
+    }
+
+    left thigh
+    {
+        "isEuler": true,
+        "_x": 0.11285620724473742,
+        "_y": -0.00002293003459195574,
+        "_z": -3.074417015377089,
+        "_order": "XYZ"
+    }
+
+    right thigh
+    {
+        "isEuler": true,
+        "_x": 0.11285700531116258,
+        "_y": 0.000133939420187595,
+        "_z": 3.0744067204304533,
+        "_order": "XYZ"
+    }
+     */
+
     /**
      *
      */
@@ -291,7 +345,7 @@ export default class JointsPosition2Rotation {
 
 
         const xaxis = new THREE.Vector3()
-            .subVectors(left_hip, right_hip)
+            .subVectors(right_hip, left_hip)
             .normalize();
 
         const y_tmp = new THREE.Vector3()
@@ -385,13 +439,13 @@ export default class JointsPosition2Rotation {
         this.pose3d = pose3D;
 
         for (let i in this.pose3d) {
-            // this.pose3d[i].x = this.pose3d[i].x;
+            this.pose3d[i].x = this.pose3d[i].x;
             this.pose3d[i].y = -this.pose3d[i].y;
         }
 
         this.rotations["Hips"] = this.#pelvisRotation();
 
-        this.rotations["Spine2"] = this.#spine2rotation();
+        // this.rotations["Spine2"] = this.#spine2rotation();
 
         return
 
