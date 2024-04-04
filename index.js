@@ -8,7 +8,7 @@ import JointsPosition2Rotation from "./JointsPosition2Rotation.js"
 
 const npy = new npyjs()
 
-const filepath = path.join(os.homedir(), "Documents", "video2motion", "results3d")
+const filepath = path.join("D:\\", "video2motion", "results3d")
 
 const sample_names = ['180 Turn W_ Briefcase (1)-30-0.avi.npy', 'Pull Plant-30-0.avi.npy',
     'Receiver Catch-30-0.avi.npy', 'Sitting Clap (4)-30-0.avi.npy', 'Walking (9)-30-0.avi.npy'
@@ -50,7 +50,7 @@ function draw (file) {
 
     const json_filename = file.replace(".avi.npy", ".json")
 
-    fs.writeFileSync(path.join(os.homedir(), "Documents", "video2motion-animplayer", "public", "anim-euler-uniform", json_filename), json_data)
+    fs.writeFileSync(path.join("D:\\", "repos", "video2motion-animplayer", "public", "anim-euler-uniform", json_filename), json_data)
 
 }
 
