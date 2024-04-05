@@ -2,7 +2,9 @@ import * as THREE from 'three';
 
 export default class JointsPosition2Rotation {
 
-    // // mediapipe 33 joints mapping to index
+
+    constructor() { }
+
     // joints_map = {
     //     "PELVIS": 0,
     //     "LEFT_HIP": 1,
@@ -25,24 +27,23 @@ export default class JointsPosition2Rotation {
 
     joints_map = {
         "PELVIS": 0,
-        "LEFT_HIP": 4,
-        "LEFT_KNEE": 5,
-        "LEFT_ANKLE": 6,
         "RIGHT_HIP": 1,
         "RIGHT_KNEE": 2,
         "RIGHT_ANKLE": 3,
+        "LEFT_HIP": 4,
+        "LEFT_KNEE": 5,
+        "LEFT_ANKLE": 6,
         "SPINE": 7,
         "NECK": 8,
         "nose": 9,
         "top": 10,
-        "RIGHT_SHOULDER": 14,
-        "RIGHT_ELBOW": 15,
-        "RIGHT_WRIST": 16,
         "LEFT_SHOULDER": 11,
         "LEFT_ELBOW": 12,
         "LEFT_WRIST": 13,
+        "RIGHT_SHOULDER": 14,
+        "RIGHT_ELBOW": 15,
+        "RIGHT_WRIST": 16,
     };
-
 
     /**
      * @type {Array<Float32Array>}
@@ -81,143 +82,27 @@ export default class JointsPosition2Rotation {
         ),
         "RightLeg": new THREE.Quaternion(0, 0, 0, 1),
     }
-    rotations_world = {
-        "Hips": new THREE.Quaternion(0, 0, 0, 1),
-        "Spine2": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftShoulder": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftArm": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftForeArm": new THREE.Quaternion(0, 0, 0, 1),
-        "RightShoulder": new THREE.Quaternion(0, 0, 0, 1),
-        "RightArm": new THREE.Quaternion(0, 0, 0, 1),
-        "RightForeArm": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftUpLeg": new THREE.Quaternion(0, 0, 0, 1),
-        "LeftLeg": new THREE.Quaternion(0, 0, 0, 1),
-        "RightUpLeg": new THREE.Quaternion(0, 0, 0, 1),
-        "RightLeg": new THREE.Quaternion(0, 0, 0, 1),
+
+    limb_joint_pairs = {
+        "LeftArm": ["LEFT_SHOULDER", "LEFT_ELBOW"],
+        "RightArm": ["RIGHT_SHOULDER", "RIGHT_ELBOW"],
+        "LeftForeArm": ["LEFT_ELBOW", "LEFT_WRIST"],
+        "RightForeArm": ["RIGHT_ELBOW", "RIGHT_WRIST"],
+        "LeftUpLeg": ["LEFT_HIP", "LEFT_KNEE"],
+        "RightUpLeg": ["RIGHT_HIP", "RIGHT_KNEE"],
+        "LeftLeg": ["LEFT_KNEE", "LEFT_ANKLE"],
+        "RightLeg": ["RIGHT_KNEE", "RIGHT_ANKLE"],
     }
 
-    /**
-     * left shoulder
-     * {
-    "isEuler": true,
-    "_x": 1.5198795050922367,
-    "_y": -0.15171872670981498,
-    "_z": -1.753153402330732,
-    "_order": "XYZ"
-    }
-
-    right shoulder 
-    {
-        "isEuler": true,
-        "_x": 1.5198807179038891,
-        "_y": 0.1517170924223086,
-        "_z": 1.7531534740480517,
-        "_order": "XYZ"
-    }
-
-    left thigh
-    {
-        "isEuler": true,
-        "_x": 0.11285620724473742,
-        "_y": -0.00002293003459195574,
-        "_z": -3.074417015377089,
-        "_order": "XYZ"
-    }
-
-    right thigh
-    {
-        "isEuler": true,
-        "_x": 0.11285700531116258,
-        "_y": 0.000133939420187595,
-        "_z": 3.0744067204304533,
-        "_order": "XYZ"
-    }
-     */
-
-    /**
-     *
-     */
-    constructor() { }
-
-
-
-
-    /**
-     *
-     * @param {string} bone_name
-     * @param {string} parent_bone_name
-     * @param {string} start_joint_name
-     * @param {string} end_joint_name
-     * @param {THREE.Euler} init_euler
-     * @param {THREE.Vector3} up_vector
-     */
-    #rotateLimb (
-        bone_name,
-        parent_bone_name,
-        start_joint_name,
-        end_joint_name,
-        init_euler,
-        up_vector
-    ) {
-
-
-        const start_joint =
-            this.pose3d[this.joints_map[start_joint_name]];
-        const end_joint =
-            this.pose3d[this.joints_map[end_joint_name]];
-
-        const world_target_vector = new THREE.Vector3(
-            end_joint.x - start_joint.x,
-            end_joint.y - start_joint.y,
-            end_joint.z - start_joint.z
-        ).normalize();
-
-        // console.log(parent_bone_name, this.rotations[parent_bone_name])
-
-        const world_quaternion = this.rotations[parent_bone_name].clone();
-
-        // after apply the parent quaternion,
-        // `world_target_vector` actually became the local target vector
-        world_target_vector.applyQuaternion(world_quaternion.conjugate());
-
-        // store the local vectors for all bones, used for gesture classification
-        // this.local_vectors[bone_name] = world_target_vector.clone();
-
-        // all the bones rest pose in the model is (0,1,0)
-        // first place the limb to the human body nature position
-        const init_quaternion = new THREE.Quaternion().setFromEuler(init_euler);
-
-        // maby for thighs, the up_vector should be (0,-1,0)
-        // const up_vector = new THREE.Vector3(0, 1, 0);
-
-        // this is the real human body rotation,
-        let local_quaternion_bio = new THREE.Quaternion().setFromUnitVectors(
-            up_vector,
-            world_target_vector
-        );
-
-        // Note that rotating by `a` and then by `b` is equivalent to 
-        // performing a single rotation by the quaternion product `ba`.
-        const local_quaternion_bone =
-            new THREE.Quaternion().multiplyQuaternions(
-                local_quaternion_bio,
-                init_quaternion
-            );
-
-        // const angle = local_quaternion_bone.angleTo(new THREE.Quaternion());
-
-        // const axis = new THREE.Vector3(
-        // 	local_quaternion_bone.x,
-        // 	local_quaternion_bone.y,
-        // 	local_quaternion_bone.z
-        // );
-
-        // const local_quaternion_round = new THREE.Quaternion().setFromAxisAngle(
-        // 	axis,
-        // 	parseFloat(angle.toFixed(2)) // this will cause the left arm unable to hang down
-        // );
-
-        this.rotations[bone_name] = local_quaternion_bone.normalize()
+    limb_parent = {
+        "LeftArm": ["Hips", "Spine2", "LeftShoulder"],
+        "RightArm": ["Hips", "Spine2", "RightShoulder"],
+        "LeftForeArm": ["Hips", "Spine2", "LeftShoulder", "LeftArm"],
+        "RightForeArm": ["Hips", "Spine2", "RightShoulder", "RightArm"],
+        "LeftUpLeg": ["Hips"],
+        "RightUpLeg": ["Hips"],
+        "LeftLeg": ["Hips", "LeftUpLeg"],
+        "RightLeg": ["Hips", "RightUpLeg"],
     }
 
 
@@ -335,6 +220,25 @@ export default class JointsPosition2Rotation {
         return new THREE.Quaternion().setFromAxisAngle(axis, angle);
     }
 
+    #get_limb_quaternion (limb_name, up_vector) {
+        const limb = this.limb_joint_pairs[limb_name];
+
+        const target_vector = this.#get_joint_world_vector(limb[0], limb[1]);
+
+        for (const parent_bone_name of this.limb_parent[limb_name]) {
+
+            const parent_q = this.rotations[parent_bone_name];
+
+            target_vector.applyQuaternion(parent_q.clone().conjugate());
+        }
+
+        const angle = up_vector.angleTo(target_vector);
+
+        const axis = new THREE.Vector3().crossVectors(up_vector, target_vector).normalize();
+
+        return new THREE.Quaternion().setFromAxisAngle(axis, angle);
+    }
+
     /**
      *
      * @param {{x:number, y:number, z:number}[]} pose3D
@@ -342,18 +246,10 @@ export default class JointsPosition2Rotation {
      */
     applyPose2Bone (pose3D) {
 
-        /**
-         * the coordinates system used by videopose3d as follows:
-         * x-axis: from right to left (negative at right)
-         * y-axis: from top to bottom (negative at top)
-         * z-axis: from back to front (negative at back)
-         * so swap left and eight (already did in `joints_map`), reverse y axis to fit the three.js coordinates system
-         */
-
         this.pose3d = pose3D;
 
+        // afjust the coordinate system from videopose3d to threejs
         for (let i in this.pose3d) {
-            // this.pose3d[i].x = this.pose3d[i].x;
             this.pose3d[i].y = -this.pose3d[i].y;
             this.pose3d[i].z = -this.pose3d[i].z;
         }
@@ -362,63 +258,34 @@ export default class JointsPosition2Rotation {
 
         this.rotations["Spine2"] = this.#spine2rotation();
 
-        this.rotations["LeftShoulder"] = new THREE.Quaternion(
-            0.4816880226135254, 0.4927692711353302, -0.5889065265655518, 0.4223082959651947);
+        this.rotations["LeftShoulder"] = new THREE.Quaternion(0.4816880226135254, 0.4927692711353302, -0.5889065265655518, 0.4223082959651947);
 
-        this.rotations["RightShoulder"] = new THREE.Quaternion(
-            0.48168784379959106, -0.4927700459957123, 0.588905930519104, 0.42230847477912903)
-
-        // this.rotations store the local rotation of each bone
-
-        const left_arm_world_vector_target = this.#get_joint_world_vector("LEFT_SHOULDER", "LEFT_ELBOW");
-
-        const left_arm_world_vector_init = new THREE.Vector3(0, 1, 0);
-
-        left_arm_world_vector_target.applyQuaternion(this.rotations["Hips"].clone().conjugate());
-        left_arm_world_vector_target.applyQuaternion(this.rotations["Spine2"].clone().conjugate());
-        left_arm_world_vector_target.applyQuaternion(this.rotations["LeftShoulder"].clone().conjugate());
-
-        this.rotations["LeftArm"] = this.#get_limb_world_quaternion(left_arm_world_vector_init, left_arm_world_vector_target)
-
-        // right arm
-        const right_arm_world_vector_target = this.#get_joint_world_vector("RIGHT_SHOULDER", "RIGHT_ELBOW");
-
-        const right_arm_world_vector_init = new THREE.Vector3(0, 1, 0);
-
-        right_arm_world_vector_target.applyQuaternion(this.rotations["Hips"].clone().conjugate());
-        right_arm_world_vector_target.applyQuaternion(this.rotations["Spine2"].clone().conjugate());
-        right_arm_world_vector_target.applyQuaternion(this.rotations["RightShoulder"].clone().conjugate());
-
-        this.rotations["RightArm"] = this.#get_limb_world_quaternion(right_arm_world_vector_init, right_arm_world_vector_target)
-
-        const left_forearm_world_vector_target = this.#get_joint_world_vector("LEFT_ELBOW", "LEFT_WRIST");
-
-        const left_forearm_world_vector_init = new THREE.Vector3(0, 1, 0);
-
-        left_forearm_world_vector_target.applyQuaternion(this.rotations["Hips"].clone().conjugate());
-        left_forearm_world_vector_target.applyQuaternion(this.rotations["Spine2"].clone().conjugate());
-        left_forearm_world_vector_target.applyQuaternion(this.rotations["LeftShoulder"].clone().conjugate());
-        left_forearm_world_vector_target.applyQuaternion(this.rotations["LeftArm"].clone().conjugate());
-
-        this.rotations["LeftForeArm"] = this.#get_limb_world_quaternion(left_forearm_world_vector_init, left_forearm_world_vector_target)
-
-        const right_forearm_world_vector_target = this.#get_joint_world_vector("RIGHT_ELBOW", "RIGHT_WRIST");
-
-        const right_forearm_world_vector_init = new THREE.Vector3(0, 1, 0);
-
-        right_forearm_world_vector_target.applyQuaternion(this.rotations["Hips"].clone().conjugate());
-        right_forearm_world_vector_target.applyQuaternion(this.rotations["Spine2"].clone().conjugate());
-        right_forearm_world_vector_target.applyQuaternion(this.rotations["RightShoulder"].clone().conjugate());
-        right_forearm_world_vector_target.applyQuaternion(this.rotations["RightArm"].clone().conjugate());
-
-        this.rotations["RightForeArm"] = this.#get_limb_world_quaternion(new THREE.Vector3(0, 1, 0), right_forearm_world_vector_target)
+        this.rotations["RightShoulder"] = new THREE.Quaternion(0.48168784379959106, -0.4927700459957123, 0.588905930519104, 0.42230847477912903);
 
 
-        // process.exit(0)
+        this.rotations["LeftArm"] = this.#get_limb_quaternion("LeftArm", new THREE.Vector3(0, 1, 0));
+        this.rotations["RightArm"] = this.#get_limb_quaternion("RightArm", new THREE.Vector3(0, 1, 0));
 
-        return
+        this.rotations["LeftForeArm"] = this.#get_limb_quaternion("LeftForeArm", new THREE.Vector3(0, 1, 0));
+        this.rotations["RightForeArm"] = this.#get_limb_quaternion("RightForeArm", new THREE.Vector3(0, 1, 0));
 
+        const leftUpLeg_local = this.#get_limb_quaternion("LeftUpLeg", new THREE.Vector3(0, -1, 0));
+        this.rotations["LeftUpLeg"] = new THREE.Quaternion().multiplyQuaternions(leftUpLeg_local, new THREE.Quaternion(
+            0.0019053755095228553,
+            0.056365966796875,
+            -0.9978452920913696,
+            0.03352741152048111
+        ));
+        const rightUpLeg_local = this.#get_limb_quaternion("RightUpLeg", new THREE.Vector3(0, -1, 0));
+        this.rotations["RightUpLeg"] = new THREE.Quaternion().multiplyQuaternions(rightUpLeg_local, new THREE.Quaternion(
+            0.0019610640592873096,
+            -0.05636449530720711,
+            0.9978451728820801,
+            0.03352941572666168
+        ));
 
+        this.rotations["LeftLeg"] = this.#get_limb_quaternion("LeftLeg", new THREE.Vector3(0, 1, 0));
+        this.rotations["RightLeg"] = this.#get_limb_quaternion("RightLeg", new THREE.Vector3(0, 1, 0));
     }
 
     getRotationsEuler () {
