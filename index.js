@@ -34,7 +34,8 @@ function draw (file) {
 
         jpr.applyPose2Bone(joints_vectors)
 
-        bone_rotations.push(jpr.getRotationsEuler())
+        // bone_rotations.push(jpr.getRotationsEuler())
+        bone_rotations.push(jpr.getRotationsQuaternion())
 
         // break
 
