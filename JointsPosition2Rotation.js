@@ -3,45 +3,45 @@ import * as THREE from 'three';
 export default class JointsPosition2Rotation {
 
     // // mediapipe 33 joints mapping to index
-    joints_map = {
-        "PELVIS": 0,
-        "LEFT_HIP": 1,
-        "LEFT_KNEE": 2,
-        "LEFT_ANKLE": 3,
-        "RIGHT_HIP": 4,
-        "RIGHT_KNEE": 5,
-        "RIGHT_ANKLE": 6,
-        "spine": 7,
-        "NECK": 8,
-        "nose": 9,
-        "top": 10,
-        "RIGHT_SHOULDER": 11,
-        "RIGHT_ELBOW": 12,
-        "RIGHT_WRIST": 13,
-        "LEFT_SHOULDER": 14,
-        "LEFT_ELBOW": 15,
-        "LEFT_WRIST": 16,
-    };
-
     // joints_map = {
     //     "PELVIS": 0,
-    //     "LEFT_HIP": 4,
-    //     "LEFT_KNEE": 5,
-    //     "LEFT_ANKLE": 6,
-    //     "RIGHT_HIP": 1,
-    //     "RIGHT_KNEE": 2,
-    //     "RIGHT_ANKLE": 3,
+    //     "LEFT_HIP": 1,
+    //     "LEFT_KNEE": 2,
+    //     "LEFT_ANKLE": 3,
+    //     "RIGHT_HIP": 4,
+    //     "RIGHT_KNEE": 5,
+    //     "RIGHT_ANKLE": 6,
     //     "SPINE": 7,
     //     "NECK": 8,
     //     "nose": 9,
     //     "top": 10,
-    //     "RIGHT_SHOULDER": 14,
-    //     "RIGHT_ELBOW": 15,
-    //     "RIGHT_WRIST": 16,
-    //     "LEFT_SHOULDER": 11,
-    //     "LEFT_ELBOW": 12,
-    //     "LEFT_WRIST": 13,
+    //     "RIGHT_SHOULDER": 11,
+    //     "RIGHT_ELBOW": 12,
+    //     "RIGHT_WRIST": 13,
+    //     "LEFT_SHOULDER": 14,
+    //     "LEFT_ELBOW": 15,
+    //     "LEFT_WRIST": 16,
     // };
+
+    joints_map = {
+        "PELVIS": 0,
+        "LEFT_HIP": 4,
+        "LEFT_KNEE": 5,
+        "LEFT_ANKLE": 6,
+        "RIGHT_HIP": 1,
+        "RIGHT_KNEE": 2,
+        "RIGHT_ANKLE": 3,
+        "SPINE": 7,
+        "NECK": 8,
+        "nose": 9,
+        "top": 10,
+        "RIGHT_SHOULDER": 14,
+        "RIGHT_ELBOW": 15,
+        "RIGHT_WRIST": 16,
+        "LEFT_SHOULDER": 11,
+        "LEFT_ELBOW": 12,
+        "LEFT_WRIST": 13,
+    };
 
 
     /**
@@ -125,136 +125,8 @@ export default class JointsPosition2Rotation {
      */
     constructor() { }
 
-    /**
-     * the position of these 3 joints are real position of the user in front of the camera
-     * eg.
-     * left_shoulder: _Vector3 {x: -5.438949018716812, y: 9.090009704232216, z: 4.032454490661621}
-     * right_shoulder: _Vector3 {x: 4.430159032344818, y: 10.827043130993843, z: 2.75645412504673}
-     * core: _Vector3 {x: -0.2822154387831688, y: 5.020033587352373, z: 1.701674242503941}
-     *
-     * @param {THREE.Vector3} left_shoulder
-     * @param {THREE.Vector3} right_shoulder
-     * @param {THREE.Vector3} core
-     * @returns {THREE.Quaternion}
-     */
-    #getChestQuaternion (left_shoulder, right_shoulder, core) {
-        // new basis of chest from pose data
-        const xaxis = new THREE.Vector3()
-            .subVectors(left_shoulder, right_shoulder)
-            .normalize();
 
-        const y_tmp = new THREE.Vector3()
-            .subVectors(left_shoulder, core)
-            .normalize();
 
-        const zaxis = new THREE.Vector3()
-            .crossVectors(xaxis, y_tmp)
-            .normalize();
-
-        const yaxis = new THREE.Vector3()
-            .crossVectors(zaxis, xaxis)
-            .normalize();
-
-        // transfer origin basis of chest to target basis
-        const m0 = new THREE.Matrix4().makeBasis(
-            new THREE.Vector3(1, 0, 0),
-            new THREE.Vector3(0, 1, 0),
-            new THREE.Vector3(0, 0, 1)
-        );
-
-        const m1 = new THREE.Matrix4().makeBasis(xaxis, yaxis, zaxis);
-
-        const m = m1.multiply(m0.invert());
-
-        return new THREE.Quaternion().setFromRotationMatrix(m);
-    }
-
-    /**
-     * the position of these 3 joints are real position of the user in front of the camera
-     * eg.
-     * _Vector3 {x: -2.8411057591438293, y: -0.21446174243465066, z: -0.6154307909309864}
-     * _Vector3 {x: 2.759140133857727, y: 0.3627159632742405, z: 0.6565528549253941}
-     * _Vector3 {x: -0.1843450963497162, y: 5.061126192449592, z: 1.4994440227746964}
-     *
-     * @param {THREE.Vector3} left_hip
-     * @param {THREE.Vector3} right_hip
-     * @param {THREE.Vector3} core
-     * @returns {THREE.Quaternion}
-     */
-    #getAbsQuaternion (left_hip, right_hip, core) {
-        // new basis of abdominal from pose data
-        const xaxis = new THREE.Vector3()
-            .subVectors(right_hip, left_hip)
-            .normalize();
-
-        const y_tmp = new THREE.Vector3()
-            .subVectors(core, left_hip)
-            .normalize();
-
-        const zaxis = new THREE.Vector3()
-            .crossVectors(xaxis, y_tmp)
-            .normalize();
-
-        const yaxis = new THREE.Vector3()
-            .crossVectors(zaxis, xaxis)
-            .normalize();
-
-        // transfer origin basis of abdominal to target basis
-        const m0 = new THREE.Matrix4().makeBasis(
-            new THREE.Vector3(1, 0, 0),
-            new THREE.Vector3(0, 1, 0),
-            new THREE.Vector3(0, 0, 1)
-        );
-
-        const m1 = new THREE.Matrix4().makeBasis(xaxis, yaxis, zaxis);
-
-        const m = m1.multiply(m0.invert());
-
-        return new THREE.Quaternion().setFromRotationMatrix(m);
-    }
-
-    #torsoRotation () {
-        /**
-            Now you want matrix B that maps from 1st set of coords to 2nd set:
-            A2 = B * A1
-            This is now a very complex math problem that requires advanced skills to arrive at the solution:
-            B = A2 * inverse of A1
-        */
-
-        // console.log(this.pose3d, this.joints_map["LEFT_SHOULDER"])
-
-        const left_oblique = new THREE.Vector3()
-            .addVectors(
-                this.pose3d[this.joints_map["LEFT_SHOULDER"]],
-                this.pose3d[this.joints_map["LEFT_HIP"]]
-            )
-            .multiplyScalar(0.5);
-
-        const right_oblique = new THREE.Vector3()
-            .addVectors(
-                this.pose3d[this.joints_map["RIGHT_SHOULDER"]],
-                this.pose3d[this.joints_map["RIGHT_HIP"]]
-            )
-            .multiplyScalar(0.5);
-
-        const core = new THREE.Vector3()
-            .subVectors(left_oblique, right_oblique)
-            .multiplyScalar(0.5);
-
-        const chest_q = this.#getChestQuaternion(
-            this.pose3d[this.joints_map["LEFT_SHOULDER"]],
-            this.pose3d[this.joints_map["RIGHT_SHOULDER"]],
-            core
-        );
-
-        const abs_q = this.#getAbsQuaternion(
-            this.pose3d[this.joints_map["LEFT_HIP"]],
-            this.pose3d[this.joints_map["RIGHT_HIP"]],
-            core
-        );
-
-        return [abs_q, chest_q];
-    }
 
     /**
      *
@@ -345,7 +217,7 @@ export default class JointsPosition2Rotation {
 
 
         const xaxis = new THREE.Vector3()
-            .subVectors(right_hip, left_hip)
+            .subVectors(left_hip, right_hip)
             .normalize();
 
         const y_tmp = new THREE.Vector3()
@@ -364,6 +236,8 @@ export default class JointsPosition2Rotation {
 
         // console.log(xaxis, yaxis, zaxis)
 
+        // process.exit(0)
+
         const m0 = new THREE.Matrix4().makeBasis(
             new THREE.Vector3(1, 0, 0),
             new THREE.Vector3(0, 1, 0),
@@ -373,6 +247,7 @@ export default class JointsPosition2Rotation {
         const m1 = new THREE.Matrix4().makeBasis(xaxis, yaxis, zaxis);
 
         const m = m1.multiply(m0.invert());
+        // const m = m0.invert().multiply(m1);
 
         return new THREE.Quaternion().setFromRotationMatrix(m);
     }
@@ -421,6 +296,19 @@ export default class JointsPosition2Rotation {
         );
     }
 
+    #get_joint_world_vector (start_joint_name, end_joint_name) {
+        const start_joint =
+            this.pose3d[this.joints_map[start_joint_name]];
+        const end_joint =
+            this.pose3d[this.joints_map[end_joint_name]];
+
+        return new THREE.Vector3(
+            end_joint.x - start_joint.x,
+            end_joint.y - start_joint.y,
+            end_joint.z - start_joint.z
+        ).normalize();
+    }
+
     /**
      *
      * @param {{x:number, y:number, z:number}[]} pose3D
@@ -439,26 +327,34 @@ export default class JointsPosition2Rotation {
         this.pose3d = pose3D;
 
         for (let i in this.pose3d) {
-            this.pose3d[i].x = this.pose3d[i].x;
+            // this.pose3d[i].x = this.pose3d[i].x;
             this.pose3d[i].y = -this.pose3d[i].y;
+            this.pose3d[i].z = -this.pose3d[i].z;
         }
 
         this.rotations["Hips"] = this.#pelvisRotation();
 
-        // this.rotations["Spine2"] = this.#spine2rotation();
+        this.rotations["Spine2"] = this.#spine2rotation();
 
         return
 
-        const [abs_q, chest_q] = this.#torsoRotation();
+        this.rotations["LeftShoulder"] = new THREE.Quaternion(
+            0.4816880226135254, 0.4927692711353302, -0.5889065265655518, 0.4223082959651947);
 
-        this.rotations["Hips"] = abs_q
+        this.rotations["RightShoulder"] = new THREE.Quaternion(
+            0.48168784379959106, -0.4927700459957123, 0.588905930519104, 0.42230847477912903)
 
-        const chest_local = new THREE.Quaternion().multiplyQuaternions(
-            abs_q.conjugate(),
-            chest_q
-        );
+        // this.rotations store the local rotation of each bone
 
-        this.rotations["Spine2"] = chest_local
+        const left_arm_world_vector = this.#get_joint_world_vector("LEFT_SHOULDER", "LEFT_ELBOW");
+        const right_arm_world_vector = this.#get_joint_world_vector("RIGHT_SHOULDER", "RIGHT_ELBOW");
+
+        console.log(left_arm_world_vector, right_arm_world_vector)
+
+        process.exit(0)
+
+
+        return
 
         this.#rotateLimb(
             "LeftArm",
@@ -496,13 +392,17 @@ export default class JointsPosition2Rotation {
             new THREE.Vector3(0, 1, 0)
         );
 
+        return
+
         // todo LeftUpLeg and RightUpLeg should have initial rotation if the up vector is (0,-1,0)
         this.#rotateLimb(
             "LeftUpLeg",
             "Hips",
             "RIGHT_HIP",
             "RIGHT_KNEE",
-            new THREE.Euler(0, 0, 0),
+            new THREE.Euler(0.11285620724473742,
+                -0.00002293003459195574,
+                -3.074417015377089),
             new THREE.Vector3(0, -1, 0)
         );
 
@@ -521,7 +421,11 @@ export default class JointsPosition2Rotation {
             "Hips",
             "LEFT_HIP",
             "LEFT_KNEE",
-            new THREE.Euler(0, 0, 0),
+            new THREE.Euler(
+                0.11285700531116258,
+                0.000133939420187595,
+                3.0744067204304533,
+            ),
             new THREE.Vector3(0, -1, 0)
         );
 

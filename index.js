@@ -10,8 +10,9 @@ const npy = new npyjs()
 
 const filepath = path.join("D:\\", "video2motion", "results3d")
 
-const sample_names = ['180 Turn W_ Briefcase (1)-30-0.avi.npy', 'Pull Plant-30-0.avi.npy',
-    'Receiver Catch-30-0.avi.npy', 'Sitting Clap (4)-30-0.avi.npy', 'Walking (9)-30-0.avi.npy'
+const sample_names = ['180 Turn W_ Briefcase (1)-30-0.avi.npy', 'Receiver Catch-30-0.avi.npy',
+// 'Pull Plant-30-0.avi.npy',
+//      'Sitting Clap (4)-30-0.avi.npy', 'Walking (9)-30-0.avi.npy'
 ]
 
 
