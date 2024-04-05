@@ -1,7 +1,6 @@
 import npyjs from "npyjs"
 import path from "path"
 import fs from "fs"
-import os from "os"
 
 import * as THREE from "three"
 
@@ -130,6 +129,8 @@ fs.readdir(filepath, (err, files) => {
         for (let i = 0; i < files.length; i++) {
             console.log(files[i])
             draw(files[i])
+
+            break
         }
     }
 })

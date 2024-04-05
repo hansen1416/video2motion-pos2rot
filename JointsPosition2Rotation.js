@@ -210,16 +210,6 @@ export default class JointsPosition2Rotation {
         ).normalize();
     }
 
-    #get_limb_world_quaternion (up_vector, target_vector) {
-        const angle = up_vector.angleTo(target_vector);
-
-        const axis = new THREE.Vector3().crossVectors(up_vector, target_vector).normalize();
-
-        // console.log(axis, angle * 180 / Math.PI,)
-
-        return new THREE.Quaternion().setFromAxisAngle(axis, angle);
-    }
-
     #get_limb_quaternion (limb_name, up_vector) {
         const limb = this.limb_joint_pairs[limb_name];
 
