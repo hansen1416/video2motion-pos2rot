@@ -8,7 +8,8 @@ import JointsPosition2Rotation from "./JointsPosition2Rotation.js"
 
 const npy = new npyjs()
 
-const filepath = path.join("D:\\", "video2motion", "results3d")
+// const filepath = path.join("D:\\", "video2motion", "results3d")
+const filepath = path.join("C:\\", "Users", "105476", "Documents", "video2motion", "results3d")
 
 
 export function read_joints (videopose3d_results) {
@@ -78,11 +79,15 @@ export function bone_rotations2animation_data (bone_rotations) {
     return animation_euler
 }
 
-function draw (file) {
+function draw (file, save_file = false) {
     const buffer = fs.readFileSync(path.join(filepath, file))
     const res = npy.parse(buffer.buffer.slice(0, buffer.length))
 
+    // console.log(res)
+
     const res_shaped = read_joints(res)
+
+    // console.log(res_shaped[0])
 
     const bone_eulers = []
     const bone_quaternions = []
@@ -100,16 +105,23 @@ function draw (file) {
         bone_quaternions.push(jpr.getRotationsQuaternion())
     }
 
+    console.log(bone_eulers[0])
+
     const animation_euler = bone_rotations2animation_data(bone_eulers)
     const animation_quaternion = bone_rotations2animation_data(bone_quaternions)
 
     const json_euler = JSON.stringify(animation_euler, null, 4)
     const json_quaternion = JSON.stringify(animation_quaternion, null, 4)
 
-    const json_filename = file.replace(".avi.npy", ".json")
+    // console.log(json_euler)
 
-    fs.writeFileSync(path.join("D:\\", "repos", "video2motion-animplayer", "public", "anim-calculated-euler", json_filename), json_euler)
-    fs.writeFileSync(path.join("D:\\", "repos", "video2motion-animplayer", "public", "anim-calculated-quaternion", json_filename), json_quaternion)
+    if (save_file) {
+
+        const json_filename = file.replace(".avi.npy", ".json")
+
+        fs.writeFileSync(path.join("D:\\", "repos", "video2motion-animplayer", "public", "anim-calculated-euler", json_filename), json_euler)
+        fs.writeFileSync(path.join("D:\\", "repos", "video2motion-animplayer", "public", "anim-calculated-quaternion", json_filename), json_quaternion)
+    }
 }
 
 
